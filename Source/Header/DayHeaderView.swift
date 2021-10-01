@@ -42,7 +42,7 @@ public final class DayHeaderView: UIView, DaySelectorDelegate, DayViewStateUpdat
     ) {
         self.calendar = calendar
         let symbols = DaySymbolsView(calendar: calendar)
-        let swipeLabel = SwipeLabelView(calendar: calendar, presentation: style.presentation)
+        let swipeLabel = SwipeLabelView(calendar: calendar, style: style.swipeLabel, presentation: style.presentation)
         self.swipeLabelView = swipeLabel
         self.daySymbolsView = symbols
         self.style = style

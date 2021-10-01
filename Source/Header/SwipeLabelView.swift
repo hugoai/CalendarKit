@@ -64,11 +64,13 @@ public final class SwipeLabelView: UIView, DayViewStateUpdating {
     
     public init(
         calendar: Calendar = Calendar.autoupdatingCurrent,
+        style: SwipeLabelStyle,
         presentation: TimelinePresentation
     ) {
         self.calendar = calendar
         super.init(frame: .zero)
         self.presentation = presentation
+        self.style = style
         configure()
     }
     

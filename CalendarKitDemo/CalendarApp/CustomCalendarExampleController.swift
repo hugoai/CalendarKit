@@ -58,6 +58,7 @@ class CustomCalendarExampleController: DayViewController {
     
     var style = CalendarStyle()
     style.presentation = .threeDays
+    style.header.swipeLabel.backgroundColor = .white
     dayView = DayView(calendar: calendar, style: style)
     view = dayView
   }
