@@ -67,8 +67,11 @@ public struct DaySymbolsStyle {
 
 public struct SwipeLabelStyle {
     public var textColor = SystemColors.label
-    public var font = UIFont.systemFont(ofSize: 16, weight: .bold)
+    public var highlightedTextColor = SystemColors.systemBlue
+    public var font = UIFont.systemFont(ofSize: 16)
+    public var highlightedFont = UIFont.systemFont(ofSize: 16, weight: .bold)
     public var separatorColor = SystemColors.systemSeparator
+    public var backgroundColor = SystemColors.secondarySystemBackground
     public init() {}
 }
 

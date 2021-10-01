@@ -30,6 +30,11 @@ public final class DayHeaderView: UIView, DaySelectorDelegate, DayViewStateUpdat
     
     
     private let swipeLabelView: SwipeLabelView
+    private lazy var separatorView: UIView = {
+        let view = UIView()
+        view.backgroundColor = style.swipeLabel.separatorColor
+        return view
+    }()
     
     public init(
         calendar: Calendar,
@@ -50,7 +55,7 @@ public final class DayHeaderView: UIView, DaySelectorDelegate, DayViewStateUpdat
     }
     
     private func configure() {
-        [swipeLabelView].forEach(addSubview)
+        [swipeLabelView, separatorView].forEach(addSubview)
         backgroundColor = style.backgroundColor
         configurePagingViewController()
     }
@@ -97,6 +102,7 @@ public final class DayHeaderView: UIView, DaySelectorDelegate, DayViewStateUpdat
         style = newStyle
         daySymbolsView.updateStyle(style.daySymbols)
         swipeLabelView.updateStyle(style.swipeLabel)
+        separatorView.backgroundColor = style.swipeLabel.separatorColor
         (pagingViewController.viewControllers as? [DaySelectorController])?.forEach{$0.updateStyle(newStyle.daySelector)}
         backgroundColor = style.backgroundColor
     }
@@ -109,6 +115,8 @@ public final class DayHeaderView: UIView, DaySelectorDelegate, DayViewStateUpdat
                                                   size: CGSize(width: bounds.width, height: pagingScrollViewHeight))
         swipeLabelView.frame = CGRect(origin: CGPoint(x: 0, y: bounds.height - swipeLabelViewHeight),
                                       size: CGSize(width: bounds.width, height: swipeLabelViewHeight))
+        separatorView.frame = CGRect(origin: CGPoint(x: 0, y: bounds.height - 1)
+                                     , size: CGSize(width: bounds.width, height: 1))
     }
     
     public func transitionToHorizontalSizeClass(_ sizeClass: UIUserInterfaceSizeClass) {

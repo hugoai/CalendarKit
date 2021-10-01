@@ -41,7 +41,7 @@ class CustomCalendarExampleController: DayViewController {
   var alreadyGeneratedSet = Set<Date>()
   
   var colors = [UIColor.blue,
-                UIColor.yellow,
+                UIColor.purple,
                 UIColor.green,
                 UIColor.red]
   
@@ -56,7 +56,9 @@ class CustomCalendarExampleController: DayViewController {
   override func loadView() {
     calendar.timeZone = TimeZone(identifier: "Europe/Paris")!
     
-    dayView = DayView(calendar: calendar)
+    var style = CalendarStyle()
+    style.presentation = .threeDays
+    dayView = DayView(calendar: calendar, style: style)
     view = dayView
   }
   
@@ -104,7 +106,8 @@ class CustomCalendarExampleController: DayViewController {
       print(timezone)
       
       info.append(rangeFormatter.string(from: event.startDate, to: event.endDate))
-      event.text = info.reduce("", {$0 + $1 + "\n"})
+      event.text = "\(info[0])\n\(info[1])"
+      event.descriptionText = info.last!
       event.color = colors[Int(arc4random_uniform(UInt32(colors.count)))]
       event.isAllDay = Int(arc4random_uniform(2)) % 2 == 0
       event.lineBreakMode = .byTruncatingTail

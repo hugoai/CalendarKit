@@ -28,7 +28,7 @@ public final class SwipeLabelView: UIView, DayViewStateUpdating {
     
     private func updateLabelText() {
         for (idx, label) in firstLabels.enumerated() {
-            label.text = formattedDate(date: state!.selectedDate.addingTimeInterval(TimeInterval(idx * 60 * 60 * 24)))
+            label.attributedText = formattedDate(date: state!.selectedDate.addingTimeInterval(TimeInterval(idx * 60 * 60 * 24)))
         }
     }
     
@@ -82,7 +82,42 @@ public final class SwipeLabelView: UIView, DayViewStateUpdating {
         configure()
     }
     
+    public override func draw(_ rect: CGRect) {
+        super.draw(rect)
+        let oneThird: CGFloat = (bounds.width - 60) / 3
+        let context = UIGraphicsGetCurrentContext()
+        context!.interpolationQuality = .none
+        context?.saveGState()
+        context?.setStrokeColor(style.separatorColor.cgColor)
+        context?.setLineWidth(1 / UIScreen.main.scale)
+
+        let startY: CGFloat = bounds.height / 2
+        let endY: CGFloat = bounds.height
+        let firstX: CGFloat = 60
+
+        context?.beginPath()
+        context?.move(to: CGPoint(x: firstX, y: startY))
+        context?.addLine(to: CGPoint(x: firstX, y: endY))
+        context?.strokePath()
+
+        if presentation == .threeDays {
+            let secondX: CGFloat = oneThird + 60
+            let thirdX: CGFloat = oneThird * 2 + 60
+            context?.beginPath()
+            context?.move(to: CGPoint(x: secondX, y: startY))
+            context?.addLine(to: CGPoint(x: secondX, y: endY))
+            context?.strokePath()
+            context?.beginPath()
+            context?.move(to: CGPoint(x: thirdX, y: startY))
+            context?.addLine(to: CGPoint(x: thirdX, y: endY))
+            context?.strokePath()
+        }
+
+        context?.restoreGState()
+    }
+    
     private func configure() {
+        backgroundColor = style.backgroundColor
         for i in 0...1 {
             let header = UIView()
             headers.append(header)
@@ -92,18 +127,19 @@ public final class SwipeLabelView: UIView, DayViewStateUpdating {
                 let label = UILabel()
                 label.textAlignment = .center
                 header.addSubview(label)
-                let separator = SeparatorView()
-                separator.backgroundColor = style.separatorColor
-                header.addSubview(separator)
+//                let separator = SeparatorView()
+//                separator.backgroundColor = style.separatorColor
+//                header.addSubview(separator)
             } else {
                 for j in 0...2 {
                     let label = UILabel()
                     label.textAlignment = .center
                     label.tag = i*j
+                    label.numberOfLines = 0
                     header.addSubview(label)
-                    let separator = SeparatorView()
-                    separator.backgroundColor = style.separatorColor
-                    header.addSubview(separator)
+//                    let separator = SeparatorView()
+//                    separator.backgroundColor = style.separatorColor
+//                    header.addSubview(separator)
                 }
             }
         }
@@ -112,14 +148,14 @@ public final class SwipeLabelView: UIView, DayViewStateUpdating {
     
     public func updateStyle(_ newStyle: SwipeLabelStyle) {
         style = newStyle
-        for label in firstLabels {
-            label.textColor = style.textColor
-            label.font = style.font
-        }
-        for label in secondLabels {
-            label.textColor = style.textColor
-            label.font = style.font
-        }
+//        for label in firstLabels {
+//            label.textColor = style.textColor
+//            label.font = style.font
+//        }
+//        for label in secondLabels {
+//            label.textColor = style.textColor
+//            label.font = style.font
+//        }
     }
     
     private func animate(_ direction: AnimationDirection) {
@@ -224,22 +260,39 @@ public final class SwipeLabelView: UIView, DayViewStateUpdating {
         let rightToLeft = UIView.userInterfaceLayoutDirection(for: semanticContentAttribute) == .rightToLeft
         if rightToLeft { direction.flip() }
         
-        secondLabels.first!.text = formattedDate(date: newDate)
+        secondLabels.first!.attributedText = formattedDate(date: newDate)
         if (presentation == .threeDays) {
-            secondLabels[1].text = formattedDate(date: newDate.addingTimeInterval(60 * 60 * 24))
-            secondLabels[2].text = formattedDate(date: newDate.addingTimeInterval(2 * 60 * 60 * 24))
+            secondLabels[1].attributedText = formattedDate(date: newDate.addingTimeInterval(60 * 60 * 24))
+            secondLabels[2].attributedText = formattedDate(date: newDate.addingTimeInterval(2 * 60 * 60 * 24))
         }
         
         animate(direction)
     }
     
-    private func formattedDate(date: Date) -> String {
+    private func formattedDate(date: Date) -> NSMutableAttributedString {
         let timezone = calendar.timeZone
         let formatter = DateFormatter()
         formatter.dateFormat = "EEE d"
         formatter.timeZone = timezone
         formatter.locale = Locale.init(identifier: Locale.preferredLanguages[0])
-        return formatter.string(from: date).uppercased()
+        let attributedString = NSMutableAttributedString(string: formatter.string(from: date).uppercased())
+        let textColor = calendar.isDateInToday(date) ? style.highlightedTextColor : style.textColor
+        let textFont = calendar.isDateInToday(date) ? style.highlightedFont : style.font
+        attributedString.addAttribute(.foregroundColor, value: textColor, range: NSRange(location: 0, length: attributedString.length))
+        if (presentation == .oneDay) {
+            attributedString.addAttribute(.font, value: textFont, range: NSRange(location: 0, length: attributedString.length))
+        } else if (presentation == .threeDays) {
+            attributedString.replaceCharacters(in: NSRange.init(location: 3, length: 1), with: "\n")
+            attributedString.addAttribute(.font, value: style.highlightedFont, range: NSRange(location: 0, length: attributedString.length))
+            attributedString.addAttributes(
+                [
+                    NSAttributedString.Key.foregroundColor: textColor.withAlphaComponent(0.4),
+                    NSAttributedString.Key.font: style.font
+                ],
+                range: NSRange(location: 0, length: 3)
+            )
+        }
+        return attributedString
     }
 }
 
