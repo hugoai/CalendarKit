@@ -91,7 +91,7 @@ public final class TimelineView: UIView {
     }
     
     public var calendarWidth: CGFloat {
-        return bounds.width - style.leadingInset
+        return bounds.width - style.leadingInset - 10
     }
     
     public private(set) var is24hClock = true {
@@ -153,7 +153,7 @@ public final class TimelineView: UIView {
         contentScaleFactor = 1
         layer.contentsScale = 1
         contentMode = .redraw
-        backgroundColor = .white
+        backgroundColor = .clear
         addSubview(nowLine)
         
         // Add long press gesture recognizer
@@ -235,7 +235,7 @@ public final class TimelineView: UIView {
             is24hClock = calendar.locale?.uses24hClock() ?? Locale.autoupdatingCurrent.uses24hClock()
         }
         
-        backgroundColor = style.backgroundColor
+//        backgroundColor = style.backgroundColor
         setNeedsDisplay()
     }
     
@@ -364,16 +364,16 @@ public final class TimelineView: UIView {
         context?.saveGState()
         context?.setStrokeColor(style.separatorColor.cgColor)
         context?.setLineWidth(hourLineHeight)
-        
-        let startY: CGFloat = 0
+
+        let startY: CGFloat = -200
         let endY: CGFloat = bounds.height
         let firstX: CGFloat = 60
-        
+
         context?.beginPath()
         context?.move(to: CGPoint(x: firstX, y: startY))
         context?.addLine(to: CGPoint(x: firstX, y: endY))
         context?.strokePath()
-        
+
         if style.presentation == .threeDays {
             let secondX: CGFloat = oneThird + 60
             let thirdX: CGFloat = oneThird * 2 + 60
@@ -386,7 +386,7 @@ public final class TimelineView: UIView {
             context?.addLine(to: CGPoint(x: thirdX, y: endY))
             context?.strokePath()
         }
-        
+
         context?.restoreGState()
     }
     
@@ -431,7 +431,7 @@ public final class TimelineView: UIView {
             
             eventView.frame = CGRect(x: x,
                                      y: attributes.frame.minY,
-                                     width: attributes.frame.width - 4,
+                                     width: attributes.frame.width - 7,
                                      height: attributes.frame.height - 2)
             eventView.updateWithDescriptor(event: descriptor)
         }
@@ -544,7 +544,7 @@ public final class TimelineView: UIView {
     public func dateToY(_ date: Date) -> CGFloat {
 //        let provisionedDate = date.dateOnly(calendar: calendar)
 //        let timelineDate = self.date.dateOnly(calendar: calendar)
-        var dayOffset: CGFloat = 0
+//        var dayOffset: CGFloat = 0
 //        if provisionedDate > timelineDate {
 //            // Event ending the next day
 //            dayOffset += 1
@@ -552,12 +552,13 @@ public final class TimelineView: UIView {
 //            // Event starting the previous day
 //            dayOffset -= 1
 //        }
-        let fullTimelineHeight = 24 * style.verticalDiff
+//        let fullTimelineHeight = 24 * style.verticalDiff
         let hour = component(component: .hour, from: date)
         let minute = component(component: .minute, from: date)
         let hourY = CGFloat(hour) * style.verticalDiff + style.verticalInset
         let minuteY = CGFloat(minute) * style.verticalDiff / 60
-        return hourY + minuteY + fullTimelineHeight * dayOffset
+//        return hourY + minuteY + fullTimelineHeight * dayOffset
+        return hourY + minuteY
     }
     
     public func yToDate(_ y: CGFloat) -> Date {
@@ -586,11 +587,11 @@ public final class TimelineView: UIView {
     public func dateToXOffset(_ date: Date) -> CGFloat {
         let provisionedDate = date.dateOnly(calendar: calendar)
         let timelineDate = self.date.dateOnly(calendar: calendar)
-        var dayOffset: CGFloat = 0
-        if provisionedDate > timelineDate {
-            dayOffset += 1
+        let dayDifference = calendar.dateComponents([.day], from: timelineDate, to: provisionedDate)
+        if let days = dayDifference.day {
+            return CGFloat(days)
         }
-        return dayOffset
+        return 0
     }
     
     private func component(component: Calendar.Component, from date: Date) -> Int {
@@ -598,11 +599,11 @@ public final class TimelineView: UIView {
     }
     
     private func getDateInterval(date: Date) -> ClosedRange<Date> {
-        let earliestEventMintues = component(component: .minute, from: date)
+        let earliestEventMinutes = component(component: .minute, from: date)
         let splitMinuteInterval = style.splitMinuteInterval
         let minute = component(component: .minute, from: date)
         let minuteRange = (minute / splitMinuteInterval) * splitMinuteInterval
-        let beginningRange = calendar.date(byAdding: .minute, value: -(earliestEventMintues - minuteRange), to: date)!
+        let beginningRange = calendar.date(byAdding: .minute, value: -(earliestEventMinutes - minuteRange), to: date)!
         let endRange = calendar.date(byAdding: .minute, value: splitMinuteInterval, to: beginningRange)!
         return beginningRange ... endRange
     }
