@@ -58,7 +58,7 @@ public final class SwipeLabelView: UIView, DayViewStateUpdating {
     
     private var headers = [UIView]()
     
-    private var style = SwipeLabelStyle()
+    private var style: SwipeLabelStyle
     
     private var presentation: TimelinePresentation = .oneDay
     
@@ -68,20 +68,14 @@ public final class SwipeLabelView: UIView, DayViewStateUpdating {
         presentation: TimelinePresentation
     ) {
         self.calendar = calendar
+        self.style = style
         super.init(frame: .zero)
         self.presentation = presentation
-        self.style = style
         configure()
     }
     
-    override public init(frame: CGRect) {
-        super.init(frame: frame)
-        configure()
-    }
-    
-    required public init?(coder aDecoder: NSCoder) {
-        super.init(coder: aDecoder)
-        configure()
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
     
     public override func draw(_ rect: CGRect) {
@@ -150,14 +144,8 @@ public final class SwipeLabelView: UIView, DayViewStateUpdating {
     
     public func updateStyle(_ newStyle: SwipeLabelStyle) {
         style = newStyle
-//        for label in firstLabels {
-//            label.textColor = style.textColor
-//            label.font = style.font
-//        }
-//        for label in secondLabels {
-//            label.textColor = style.textColor
-//            label.font = style.font
-//        }
+        backgroundColor = style.backgroundColor
+        setNeedsLayout()
     }
     
     private func animate(_ direction: AnimationDirection) {
