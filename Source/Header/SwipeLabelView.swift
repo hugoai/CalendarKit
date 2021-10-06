@@ -26,9 +26,12 @@ public final class SwipeLabelView: UIView, DayViewStateUpdating {
         }
     }
     
+    private var date: Date?
+    
     private func updateLabelText() {
+        guard let date = state?.selectedDate ?? self.date else { return }
         for (idx, label) in firstLabels.enumerated() {
-            label.attributedText = formattedDate(date: state!.selectedDate.addingTimeInterval(TimeInterval(idx * 60 * 60 * 24)))
+            label.attributedText = formattedDate(date: date.addingTimeInterval(TimeInterval(idx * 60 * 60 * 24)))
         }
     }
     
@@ -78,6 +81,12 @@ public final class SwipeLabelView: UIView, DayViewStateUpdating {
         fatalError("init(coder:) has not been implemented")
     }
     
+    public func move(to date: Date) {
+        state?.move(to: date)
+        self.date = date
+        updateLabelText()
+    }
+    
     public override func draw(_ rect: CGRect) {
         super.draw(rect)
         let oneThird: CGFloat = (bounds.width - 60) / 3
@@ -85,7 +94,7 @@ public final class SwipeLabelView: UIView, DayViewStateUpdating {
         context!.interpolationQuality = .none
         context?.saveGState()
         context?.setStrokeColor(style.separatorColor.cgColor)
-        context?.setLineWidth(1 / UIScreen.main.scale)
+        context?.setLineWidth(1)
 
         let startY: CGFloat = bounds.height / 2
         let endY: CGFloat = bounds.height
@@ -216,7 +225,7 @@ public final class SwipeLabelView: UIView, DayViewStateUpdating {
     
     private func constrainSeparators() {
         let height: CGFloat = presentation == .oneDay ? 16 : 24
-        let width: CGFloat = 1 / UIScreen.main.scale
+        let width: CGFloat = 1
         let third = (bounds.width - 60) / 3
         for (idx, separator) in firstSeparators.enumerated() {
             separator.translatesAutoresizingMaskIntoConstraints = false
@@ -243,20 +252,20 @@ public final class SwipeLabelView: UIView, DayViewStateUpdating {
     // MARK: DayViewStateUpdating
     
     public func move(from oldDate: Date, to newDate: Date) {
-        guard newDate != oldDate
-        else { return }
-        var direction: AnimationDirection = newDate > oldDate ? .Forward : .Backward
-        
-        let rightToLeft = UIView.userInterfaceLayoutDirection(for: semanticContentAttribute) == .rightToLeft
-        if rightToLeft { direction.flip() }
-        
-        secondLabels.first!.attributedText = formattedDate(date: newDate)
-        if (presentation == .threeDays) {
-            secondLabels[1].attributedText = formattedDate(date: newDate.addingTimeInterval(60 * 60 * 24))
-            secondLabels[2].attributedText = formattedDate(date: newDate.addingTimeInterval(2 * 60 * 60 * 24))
-        }
-        
-        animate(direction)
+//        guard newDate != oldDate
+//        else { return }
+//        var direction: AnimationDirection = newDate > oldDate ? .Forward : .Backward
+//        
+//        let rightToLeft = UIView.userInterfaceLayoutDirection(for: semanticContentAttribute) == .rightToLeft
+//        if rightToLeft { direction.flip() }
+//        
+//        secondLabels.first!.attributedText = formattedDate(date: newDate)
+//        if (presentation == .threeDays) {
+//            secondLabels[1].attributedText = formattedDate(date: newDate.addingTimeInterval(60 * 60 * 24))
+//            secondLabels[2].attributedText = formattedDate(date: newDate.addingTimeInterval(2 * 60 * 60 * 24))
+//        }
+//        
+//        animate(direction)
     }
     
     private func formattedDate(date: Date) -> NSMutableAttributedString {

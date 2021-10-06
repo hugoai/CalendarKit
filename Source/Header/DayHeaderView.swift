@@ -60,6 +60,10 @@ public final class DayHeaderView: UIView, DaySelectorDelegate, DayViewStateUpdat
         configurePagingViewController()
     }
     
+    public func move(to date: Date) {
+        swipeLabelView.move(to: date)
+    }
+    
     private func configurePagingViewController() {
         let selectedDate = Date()
         let vc = makeSelectorController(startDate: beginningOfWeek(selectedDate))
@@ -128,7 +132,7 @@ public final class DayHeaderView: UIView, DaySelectorDelegate, DayViewStateUpdat
     // MARK: DaySelectorDelegate
     
     public func dateSelectorDidSelectDate(_ date: Date) {
-        state?.move(to: date)
+//        state?.move(to: date)
     }
     
     // MARK: DayViewStateUpdating

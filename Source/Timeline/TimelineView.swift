@@ -276,7 +276,7 @@ public final class TimelineView: UIView {
                           NSAttributedString.Key.font: style.font] as [NSAttributedString.Key : Any]
         
         let scale = UIScreen.main.scale
-        let hourLineHeight = 1 / UIScreen.main.scale
+        let hourLineHeight = 1.0
         
         let center: CGFloat
         if Int(scale) % 2 == 0 {

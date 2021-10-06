@@ -28,7 +28,7 @@ public class DayView: UIView, TimelinePagerViewDelegate {
     public var isHeaderViewVisible = true {
         didSet {
             headerHeight = isHeaderViewVisible ? headerVisibleHeight : 0
-            dayHeaderView.isHidden = !isHeaderViewVisible
+            timelinePagerView.dayHeaderView?.isHidden = !isHeaderViewVisible
             setNeedsLayout()
         }
     }
@@ -37,7 +37,7 @@ public class DayView: UIView, TimelinePagerViewDelegate {
         return timelinePagerView.timelineScrollOffset
     }
     
-    private var headerVisibleHeight: CGFloat { self.style.presentation == .oneDay ? 32 : 64 }
+    private var headerVisibleHeight: CGFloat { 0 }
     public lazy var headerHeight: CGFloat = headerVisibleHeight
     
     public var autoScrollToFirstEvent: Bool {
@@ -49,12 +49,12 @@ public class DayView: UIView, TimelinePagerViewDelegate {
         }
     }
     
-    public let dayHeaderView: DayHeaderView
+//    public let dayHeaderView: DayHeaderView
     public let timelinePagerView: TimelinePagerView
     
     public var state: DayViewState? {
         didSet {
-            dayHeaderView.state = state
+            timelinePagerView.dayHeaderView?.state = state
             timelinePagerView.state = state
         }
     }
@@ -69,39 +69,39 @@ public class DayView: UIView, TimelinePagerViewDelegate {
     ) {
         self.calendar = calendar
         self.style = style
-        self.dayHeaderView = DayHeaderView(
-            calendar: calendar,
-            style: self.style.header
-        )
+//        self.dayHeaderView = DayHeaderView(
+//            calendar: calendar,
+//            style: self.style.header
+//        )
         self.timelinePagerView = TimelinePagerView(
             calendar: calendar,
-            style: self.style.timeline
+            style: self.style
         )
         super.init(frame: .zero)
         configure()
     }
     
     override public init(frame: CGRect) {
-        self.dayHeaderView = DayHeaderView(
-            calendar: calendar,
-            style: style.header
-        )
+//        self.dayHeaderView = DayHeaderView(
+//            calendar: calendar,
+//            style: style.header
+//        )
         self.timelinePagerView = TimelinePagerView(
             calendar: calendar,
-            style: style.timeline
+            style: style
         )
         super.init(frame: frame)
         configure()
     }
     
     required public init?(coder aDecoder: NSCoder) {
-        self.dayHeaderView = DayHeaderView(
-            calendar: calendar,
-            style: style.header
-        )
+//        self.dayHeaderView = DayHeaderView(
+//            calendar: calendar,
+//            style: style.header
+//        )
         self.timelinePagerView = TimelinePagerView(
             calendar: calendar,
-            style: style.timeline
+            style: style
         )
         super.init(coder: aDecoder)
         configure()
@@ -109,7 +109,7 @@ public class DayView: UIView, TimelinePagerViewDelegate {
     
     private func configure() {
         addSubview(timelinePagerView)
-        addSubview(dayHeaderView)
+//        addSubview(dayHeaderView)
         timelinePagerView.delegate = self
         
         if state == nil {
@@ -121,8 +121,8 @@ public class DayView: UIView, TimelinePagerViewDelegate {
     
     public func updateStyle(_ newStyle: CalendarStyle) {
         style = newStyle
-        dayHeaderView.updateStyle(style.header)
-        timelinePagerView.updateStyle(style.timeline)
+//        dayHeaderView.updateStyle(style.header)
+        timelinePagerView.updateStyle(style)
     }
     
     public func timelinePanGestureRequire(toFail gesture: UIGestureRecognizer) {
@@ -147,15 +147,15 @@ public class DayView: UIView, TimelinePagerViewDelegate {
     
     override public func layoutSubviews() {
         super.layoutSubviews()
-        dayHeaderView.frame = CGRect(origin: CGPoint(x: 0, y: layoutMargins.top),
+        timelinePagerView.dayHeaderView?.frame = CGRect(origin: CGPoint(x: 0, y: layoutMargins.top),
                                      size: CGSize(width: bounds.width, height: headerHeight))
-        let timelinePagerHeight = bounds.height - dayHeaderView.frame.maxY
-        timelinePagerView.frame = CGRect(origin: CGPoint(x: 0, y: dayHeaderView.frame.maxY),
+        let timelinePagerHeight = bounds.height - (timelinePagerView.dayHeaderView?.frame.maxY ?? 0)
+        timelinePagerView.frame = CGRect(origin: CGPoint(x: 0, y: timelinePagerView.dayHeaderView?.frame.maxY ?? 0),
                                          size: CGSize(width: bounds.width, height: timelinePagerHeight))
     }
     
     public func transitionToHorizontalSizeClass(_ sizeClass: UIUserInterfaceSizeClass) {
-        dayHeaderView.transitionToHorizontalSizeClass(sizeClass)
+        timelinePagerView.dayHeaderView?.transitionToHorizontalSizeClass(sizeClass)
         updateStyle(style)
     }
     

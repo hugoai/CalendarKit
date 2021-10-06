@@ -36,7 +36,7 @@ public final class TimelinePagerView: UIView, UIGestureRecognizerDelegate, UIScr
     private var pagingViewController = UIPageViewController(transitionStyle: .scroll,
                                                             navigationOrientation: .horizontal,
                                                             options: nil)
-    private var style: TimelineStyle
+    private var style: CalendarStyle
     
     private lazy var panGestureRecognizer = UIPanGestureRecognizer(target: self,
                                                                     action: #selector(handlePanGesture(_:)))
@@ -66,12 +66,21 @@ public final class TimelinePagerView: UIView, UIGestureRecognizerDelegate, UIScr
         }
         didSet {
             state?.subscribe(client: self)
+            pagingViewController.viewControllers?.forEach({ (timelineContainer) in
+                if let controller = timelineContainer as? TimelineContainerController {
+                    controller.header.move(to: controller.timeline.date)
+                }
+            })
         }
+    }
+    
+    public var dayHeaderView: DayHeaderView? {
+        return currentTimeline?.header
     }
     
     public init(
         calendar: Calendar,
-        style: TimelineStyle
+        style: CalendarStyle
     ) {
         self.calendar = calendar
         self.style = style
@@ -93,21 +102,22 @@ public final class TimelinePagerView: UIView, UIGestureRecognizerDelegate, UIScr
         panGestureRecognizer.delegate = self
     }
     
-    public func updateStyle(_ newStyle: TimelineStyle) {
+    public func updateStyle(_ newStyle: CalendarStyle) {
         style = newStyle
         pagingViewController.viewControllers?.forEach({ (timelineContainer) in
             if let controller = timelineContainer as? TimelineContainerController {
                 self.updateStyleOfTimelineContainer(controller: controller)
             }
         })
-        pagingViewController.view.backgroundColor = style.backgroundColor
+        pagingViewController.view.backgroundColor = style.timeline.backgroundColor
     }
     
     private func updateStyleOfTimelineContainer(controller: TimelineContainerController) {
         let container = controller.container
         let timeline = controller.timeline
-        timeline.updateStyle(style)
-        container.backgroundColor = style.backgroundColor
+        timeline.updateStyle(style.timeline)
+        dayHeaderView?.updateStyle(style.header)
+        container.backgroundColor = style.timeline.backgroundColor
     }
     
     public func timelinePanGestureRequire(toFail gesture: UIGestureRecognizer) {
@@ -127,13 +137,14 @@ public final class TimelinePagerView: UIView, UIGestureRecognizerDelegate, UIScr
     }
     
     private func configureTimelineController(date: Date) -> TimelineContainerController {
-        let controller = TimelineContainerController()
+        let controller = TimelineContainerController(style: style, calendar: calendar)
         updateStyleOfTimelineContainer(controller: controller)
         let timeline = controller.timeline
         timeline.longPressGestureRecognizer.addTarget(self, action: #selector(timelineDidLongPress(_:)))
         timeline.delegate = self
         timeline.calendar = calendar
         timeline.date = date.dateOnly(calendar: calendar)
+        controller.header.move(to: date)
         controller.container.delegate = self
         updateTimeline(timeline)
         return controller
@@ -287,8 +298,8 @@ public final class TimelinePagerView: UIView, UIGestureRecognizerDelegate, UIScr
             } else { // Bottom handle
                 suggestedEventFrame.size.height += diff.y
             }
-            let minimumMinutesEventDurationWhileEditing = CGFloat(style.minimumEventDurationInMinutesWhileEditing)
-            let minimumEventHeight = minimumMinutesEventDurationWhileEditing * style.verticalDiff / 60
+            let minimumMinutesEventDurationWhileEditing = CGFloat(style.timeline.minimumEventDurationInMinutesWhileEditing)
+            let minimumEventHeight = minimumMinutesEventDurationWhileEditing * style.timeline.verticalDiff / 60
             let suggestedEventHeight = suggestedEventFrame.size.height
             
             if suggestedEventHeight > minimumEventHeight {
@@ -329,7 +340,7 @@ public final class TimelinePagerView: UIView, UIGestureRecognizerDelegate, UIScr
                                   timeline: timeline)
                 let snapped = timeline.snappingBehavior.nearestDate(to: ytd)
                 let leftToRight = UIView.userInterfaceLayoutDirection(for: semanticContentAttribute) == .leftToRight
-                let x = leftToRight ? style.leadingInset : 0
+                let x = leftToRight ? style.timeline.leadingInset : 0
                 
                 var eventFrame = editedEventView.frame
                 eventFrame.origin.x = x
@@ -451,7 +462,7 @@ public final class TimelinePagerView: UIView, UIGestureRecognizerDelegate, UIScr
     
     public func pageViewController(_ pageViewController: UIPageViewController, viewControllerBefore viewController: UIViewController) -> UIViewController? {
         guard let containerController = viewController as? TimelineContainerController  else {return nil}
-        let previousDate = calendar.date(byAdding: .day, value: -1, to: containerController.timeline.date)!
+        let previousDate = calendar.date(byAdding: .day, value: style.presentation == .oneDay ? -1 : -3, to: containerController.timeline.date)!
         let vc = configureTimelineController(date: previousDate)
         let offset = (pageViewController.viewControllers?.first as? TimelineContainerController)?.container.contentOffset
         vc.pendingContentOffset = offset
