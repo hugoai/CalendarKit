@@ -42,7 +42,7 @@ public final class TimelineView: UIView {
             recalculateEventLayout()
             prepareEventViews()
             allDayView.events = allDayLayoutAttributes.map { $0.descriptor }
-            allDayView.isHidden = allDayLayoutAttributes.count == 0
+            allDayView.isHidden = allDayLayoutAttributes.count == 0 || style.presentation == .threeDays
             allDayView.scrollToBottom()
             
             setNeedsLayout()
@@ -67,14 +67,14 @@ public final class TimelineView: UIView {
     private lazy var allDayView: AllDayView = {
         let allDayView = AllDayView(frame: CGRect.zero)
         
-//        allDayView.translatesAutoresizingMaskIntoConstraints = false
-//        addSubview(allDayView)
-//
-//        self.allDayViewTopConstraint = allDayView.topAnchor.constraint(equalTo: topAnchor, constant: 0)
-//        self.allDayViewTopConstraint?.isActive = true
-//
-//        allDayView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 0).isActive = true
-//        allDayView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: 0).isActive = true
+        allDayView.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(allDayView)
+
+        self.allDayViewTopConstraint = allDayView.topAnchor.constraint(equalTo: topAnchor, constant: 0)
+        self.allDayViewTopConstraint?.isActive = true
+
+        allDayView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 0).isActive = true
+        allDayView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: 0).isActive = true
         
         return allDayView
     }()

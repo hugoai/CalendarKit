@@ -18,6 +18,7 @@ public final class AllDayView: UIView {
     let label = UILabel()
     label.translatesAutoresizingMaskIntoConstraints = false
     label.text = localizedString("all-day")
+      label.setContentHuggingPriority(.defaultHigh, for: .horizontal)
     label.setContentCompressionResistancePriority(.required, for: .horizontal)
     return label
   }()
@@ -26,14 +27,15 @@ public final class AllDayView: UIView {
    vertical scroll view that contains the all day events in rows with only 2
    columns at most
    */
-  private(set) lazy var scrollView: UIScrollView = {
-    let sv = UIScrollView()
-    sv.translatesAutoresizingMaskIntoConstraints = false
-    sv.isScrollEnabled = true
-    sv.alwaysBounceVertical = true
-    sv.clipsToBounds = false
-    return sv
-  }()
+    private(set) lazy var scrollView: UIScrollView = {
+        let sv = UIScrollView()
+        sv.translatesAutoresizingMaskIntoConstraints = false
+        sv.isScrollEnabled = true
+        sv.alwaysBounceVertical = true
+        sv.clipsToBounds = false
+        sv.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        return sv
+    }()
   
   // MARK: - RETURN VALUES
   
@@ -71,7 +73,7 @@ public final class AllDayView: UIView {
     //add All-Day UILabel
     addSubview(textLabel)
     
-    let svLeftConstraint = scrollView.leadingAnchor.constraint(equalTo: textLabel.trailingAnchor, constant: 8)
+    let svLeftConstraint = scrollView.leadingAnchor.constraint(equalTo: textLabel.trailingAnchor, constant: 14)
     
     addConstraints([
         NSLayoutConstraint(item: textLabel, attribute: .leading, relatedBy: .equal, toItem: self, attribute: .leading, multiplier: 1, constant: 8),
@@ -143,6 +145,7 @@ public final class AllDayView: UIView {
       distribution: .fillEqually,
       spacing: 1.0
     )
+      verticalStackView.setContentHuggingPriority(.defaultLow, for: .horizontal)
     var horizontalStackView: UIStackView! = nil
     
     for (index, anEventDescriptor) in self.events.enumerated() {

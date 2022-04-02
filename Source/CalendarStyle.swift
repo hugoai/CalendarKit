@@ -22,6 +22,7 @@ public struct CalendarStyle {
         didSet {
             header.presentation = presentation
             timeline.presentation = presentation
+            timeline.allDayStyle.presentation = presentation
         }
     }
     public lazy var header = DayHeaderStyle(presentation: presentation)
@@ -83,7 +84,7 @@ public struct TimelineStyle {
     public var backgroundColor = SystemColors.systemBackground
     public var font = UIFont.boldSystemFont(ofSize: 11)
     public var dateStyle : DateStyle = .system
-    public var eventsWillOverlap: Bool = false
+    public var eventsWillOverlap: Bool = true
     public var minimumEventDurationInMinutesWhileEditing: Int = 30
     public var splitMinuteInterval: Int = 15
     public var verticalDiff: CGFloat = 64
@@ -104,8 +105,9 @@ public struct CurrentTimeIndicatorStyle {
 }
 
 public struct AllDayViewStyle {
-    public var backgroundColor: UIColor = SystemColors.systemGray4
+    public var backgroundColor: UIColor = SystemColors.secondarySystemBackground
     public var allDayFont = UIFont.systemFont(ofSize: 12.0)
     public var allDayColor: UIColor = SystemColors.label
+    public var presentation: TimelinePresentation = .oneDay
     public init() {}
 }
