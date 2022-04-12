@@ -6,7 +6,7 @@ public final class AllDayView: UIView {
     
     private let allDayEventHeight: CGFloat = 24.0
     
-    
+    public var firstDay = Date()
     
     public var events: [EventDescriptor] = [] {
         didSet {
@@ -149,30 +149,115 @@ public final class AllDayView: UIView {
         )
         verticalStackView.setContentHuggingPriority(.defaultLow, for: .horizontal)
         var horizontalStackView: UIStackView! = nil
-        
-        for (index, anEventDescriptor) in self.events.enumerated() {
-            
-            // create event
-            let eventView = EventView(frame: CGRect.zero)
-            eventView.updateWithDescriptor(event: anEventDescriptor)
-            eventView.heightAnchor.constraint(equalToConstant: allDayEventHeight).isActive = true
-            
-            // create horz stack view if index % 2 == 0
-            if index % 2 == 0 {
-                horizontalStackView = UIStackView(
-                    axis: .horizontal,
-                    distribution: .fillEqually,
-                    spacing: 1.0
-                )
-                horizontalStackView.translatesAutoresizingMaskIntoConstraints = false
-                verticalStackView.addArrangedSubview(horizontalStackView)
+        if style.presentation == .oneDay {
+            for (index, anEventDescriptor) in self.events.enumerated() {
+                
+                // create event
+                let eventView = EventView(frame: CGRect.zero)
+                eventView.updateWithDescriptor(event: anEventDescriptor)
+                eventView.heightAnchor.constraint(equalToConstant: allDayEventHeight).isActive = true
+                
+                // create horz stack view if index % 2 == 0
+                if index % 2 == 0 {
+                    horizontalStackView = UIStackView(
+                        axis: .horizontal,
+                        distribution: .fillEqually,
+                        spacing: 1.0
+                    )
+                    horizontalStackView.translatesAutoresizingMaskIntoConstraints = false
+                    verticalStackView.addArrangedSubview(horizontalStackView)
+                }
+                
+                // add eventView to horz. stack view
+                horizontalStackView.addArrangedSubview(eventView)
+                eventViews.append(eventView)
+            }
+        } else if style.presentation == .threeDays {
+            var day0: Array<EventDescriptor> = []
+            var day1: Array<EventDescriptor> = []
+            var day2: Array<EventDescriptor> = []
+            var cal = Calendar(identifier: .gregorian)
+            cal.timeZone = TimeZone(secondsFromGMT: 0)!
+            let date1 = cal.date(byAdding: .day, value: 1, to: firstDay)!
+            let date2 = cal.date(byAdding: .day, value: 2, to: firstDay)!
+            for event in events {
+                if event.startDate < date1 {
+                    day0.append(event)
+                } else if event.startDate < date2 {
+                    day1.append(event)
+                } else {
+                    day2.append(event)
+                }
+            }
+            verticalStackView.axis = .horizontal
+            let viewDay0 = UIStackView(
+                axis: .vertical,
+                distribution: .fill,
+                spacing: 1.0
+            )
+            let viewDay1 = UIStackView(
+                axis: .vertical,
+                distribution: .fill,
+                spacing: 1.0
+            )
+            let viewDay2 = UIStackView(
+                axis: .vertical,
+                distribution: .fill,
+                spacing: 1.0
+            )
+            for event in day0 {
+                let eventView = EventView(frame: CGRect.zero)
+                eventView.updateWithDescriptor(event: event)
+                eventView.heightAnchor.constraint(equalToConstant: allDayEventHeight).isActive = true
+                viewDay0.addArrangedSubview(eventView)
+                eventViews.append(eventView)
+                eventView.setContentCompressionResistancePriority(.defaultHigh, for: .vertical)
+                eventView.setContentHuggingPriority(.defaultLow, for: .vertical)
+            }
+            for event in day1 {
+                let eventView = EventView(frame: CGRect.zero)
+                eventView.updateWithDescriptor(event: event)
+                eventView.heightAnchor.constraint(equalToConstant: allDayEventHeight).isActive = true
+                viewDay1.addArrangedSubview(eventView)
+                eventViews.append(eventView)
+                eventView.setContentCompressionResistancePriority(.defaultHigh, for: .vertical)
+                eventView.setContentHuggingPriority(.defaultLow, for: .vertical)
+            }
+            for event in day2 {
+                let eventView = EventView(frame: CGRect.zero)
+                eventView.updateWithDescriptor(event: event)
+                eventView.heightAnchor.constraint(equalToConstant: allDayEventHeight).isActive = true
+                viewDay2.addArrangedSubview(eventView)
+                eventViews.append(eventView)
+                eventView.setContentCompressionResistancePriority(.defaultHigh, for: .vertical)
+                eventView.setContentHuggingPriority(.defaultLow, for: .vertical)
             }
             
-            // add eventView to horz. stack view
-            horizontalStackView.addArrangedSubview(eventView)
-            eventViews.append(eventView)
+//            viewDay0.alignment = .fill
+//            viewDay1.alignment = .fill
+//            viewDay2.alignment = .fill
+            
+            viewDay0.translatesAutoresizingMaskIntoConstraints = false
+            viewDay1.translatesAutoresizingMaskIntoConstraints = false
+            viewDay2.translatesAutoresizingMaskIntoConstraints = false
+            
+            viewDay0.setContentHuggingPriority(.defaultLow, for: .vertical)
+            viewDay1.setContentHuggingPriority(.defaultLow, for: .vertical)
+            viewDay2.setContentHuggingPriority(.defaultLow, for: .vertical)
+            
+            viewDay0.setContentCompressionResistancePriority(.defaultHigh, for: .vertical)
+            viewDay1.setContentCompressionResistancePriority(.defaultHigh, for: .vertical)
+            viewDay2.setContentCompressionResistancePriority(.defaultHigh, for: .vertical)
+            
+            verticalStackView.alignment = .top
+            verticalStackView.addArrangedSubview(viewDay0)
+            verticalStackView.addArrangedSubview(viewDay1)
+            verticalStackView.addArrangedSubview(viewDay2)
+            viewDay0.sizeToFit()
+            viewDay1.sizeToFit()
+            viewDay2.sizeToFit()
+            verticalStackView.sizeToFit()
         }
-        
         // add vert. stack view inside, pin vert. stack view, update content view by the number of horz. stack views
         verticalStackView.translatesAutoresizingMaskIntoConstraints = false
         scrollView.addSubview(verticalStackView)

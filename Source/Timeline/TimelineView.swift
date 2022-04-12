@@ -12,6 +12,7 @@ public final class TimelineView: UIView {
     
     public var date = Date() {
         didSet {
+            allDayView.firstDay = date
             setNeedsLayout()
         }
     }
@@ -42,8 +43,8 @@ public final class TimelineView: UIView {
             recalculateEventLayout()
             prepareEventViews()
             allDayView.events = allDayLayoutAttributes.map { $0.descriptor }
-            allDayView.isHidden = allDayLayoutAttributes.count == 0 || style.presentation == .threeDays
-            allDayView.scrollToBottom()
+            allDayView.isHidden = allDayLayoutAttributes.count == 0 //|| style.presentation == .threeDays
+//            allDayView.scrollToBottom()
             
             setNeedsLayout()
         }
